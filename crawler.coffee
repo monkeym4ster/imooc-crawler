@@ -2,7 +2,6 @@
 request = require 'request'
 cheerio = require 'cheerio'
 fs = require 'fs'
-exec = require('child_process').exec
 
 
 ###
@@ -14,17 +13,16 @@ readVideoList = (url, callback) ->
   console.log 'Read video list: %s', url
   request.get url, (err, res) ->
     if err
-      return callback(err)
+      return callback err
     if res and res.statusCode is 200
-      $ = cheerio.load(res.body)
-      $('.J-media-item').each(() ->
+      $ = cheerio.load res.body
+      $('.J-media-item').each () ->
         $me = $(this)
         item ={
           id: $me.attr('href').match(/\d+/)[0]
           name: $me.text().trim()
         }
         return callback null, item
-      )
 
 ###
 # Read video detail
@@ -48,20 +46,20 @@ readVideoDetail = (id, callback) ->
 saveVideo = (url, filename) ->
   console.log 'Download video: %s', url
   request(url).pipe(
-    fWriteSteam = fs.createWriteStream(filename)
+    fs.createWriteStream filename
   )
 
 
 if process.argv.length is 3 and process.argv[2]
-  url = process.argv[2]
+  argv = process.argv[2]
+  url = if isNaN argv then argv else 'http://www.imooc.com/learn/' + argv
 else
   url = 'http://www.imooc.com/learn/514'
-readVideoList(url, (err, video) ->
+
+readVideoList url, (err, video) ->
   if err
     throw err
-  readVideoDetail(video.id, (err, videoUrl) ->
+  readVideoDetail video.id, (err, videoUrl) ->
     if err
       throw err
     saveVideo videoUrl, video.name + '.mp4'
-  )
-)
