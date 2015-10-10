@@ -36,7 +36,11 @@ readVideoDetail = (id, callback) ->
     if err
       return callback err
     if res and res.statusCode is 200
-      return callback null, JSON.parse(res.body).data.result.mpath[0]
+      body = JSON.parse(res.body)
+      if body.result is 0
+        return callback null, body.data.result.mpath[0]
+      else
+        return callback body.msg
 
 ###
 # Save video
@@ -44,7 +48,7 @@ readVideoDetail = (id, callback) ->
 # @param {String} filename
 ####
 saveVideo = (url, filename) ->
-  console.log 'Download video: %s', url
+  console.log 'Download video %s url is %s', filename , url
   request(url).pipe(
     fs.createWriteStream filename
   )
@@ -62,4 +66,4 @@ readVideoList url, (err, video) ->
   readVideoDetail video.id, (err, videoUrl) ->
     if err
       throw err
-    saveVideo videoUrl, video.name + '.mp4'
+    videoUrl and saveVideo videoUrl, video.name + '.mp4'
