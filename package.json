@@ -1,0 +1,21 @@
+{
+  "name": "imooc_crawler",
+  "version": "1.0.0",
+  "devDependencies": {
+    "coffee-script": "^1.10.0"
+  },
+  "description": "imooc web crawler",
+  "main": "crawler.coffee",
+  "scripts": {
+    "start": "coffee crawler.coffee"
+  },
+  "keywords": [
+    "crawler"
+  ],
+  "author": "M4ster",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^0.19.0",
+    "request": "^2.64.0"
+  }
+}
