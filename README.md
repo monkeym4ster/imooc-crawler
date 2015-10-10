@@ -1,5 +1,7 @@
 # imooc crawler
 imooc website: http://www.imooc.com
+![running.png](https://github.com/monkeym4ster/imooc_crawler/raw/master/screenshot/running.png)
+![results.png](https://github.com/monkeym4ster/imooc_crawler/raw/master/screenshot/results.png)
 
 ## Usage
 $ ./crawler.coffee [CourseID]
