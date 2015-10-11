@@ -66,4 +66,4 @@ readVideoList url, (err, video) ->
   readVideoDetail video.id, (err, videoUrl) ->
     if err
       throw err
-    videoUrl and saveVideo videoUrl, video.name + '.mp4'
+    videoUrl and saveVideo videoUrl, video.name.replace(/([\\\/\:\*\?\"\<\>\|])/g,'_') + '.mp4'
