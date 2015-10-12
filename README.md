@@ -1,14 +1,17 @@
 # imooc crawler
 imooc website: http://www.imooc.com
-![running.png](https://github.com/monkeym4ster/imooc_crawler/raw/master/screenshot/running.png)
-![results.png](https://github.com/monkeym4ster/imooc_crawler/raw/master/screenshot/results.png)
 
 ## Usage
-$ ./crawler.coffee [CourseID]
+$ ./crawler.coffee
 
-	Example:
-		./crawler.coffee http://www.imooc.com/learn/514
-		./crawler.coffee 514
+    Usage: crawler.coffee [Options]
+        --search  Search Search for the specified keywords
+        --list  List the video list under the specified course ID or URL
+        --download  Download the video list under the specified course ID or URL
+
+## Screenshot
+![running.png](https://github.com/monkeym4ster/imooc_crawler/raw/master/screenshot/running.png)
+![results.png](https://github.com/monkeym4ster/imooc_crawler/raw/master/screenshot/results.png)
 
 ## Installation
 
@@ -22,4 +25,5 @@ You can download the zip or clone the git repository :
 
 ### Install package
 	npm install
+
 
