@@ -1,8 +1,9 @@
 #!/usr/bin/env coffee
-request = require 'request'
-cheerio = require 'cheerio'
-fs = require 'fs'
+request = require('request')
+cheerio = require('cheerio')
+fs = require('fs')
 
+website = 'http://www.imooc.com'
 
 ###
 # Read video list
@@ -15,55 +16,137 @@ readVideoList = (url, callback) ->
     if err
       return callback err
     if res and res.statusCode is 200
-      $ = cheerio.load res.body
+      $ = cheerio.load(res.body)
       $('.J-media-item').each () ->
         $me = $(this)
-        item ={
+        item = {
           id: $me.attr('href').match(/\d+/)[0]
           name: $me.text().trim()
         }
         return callback null, item
+      return
+  return
 
 ###
 # Read video detail
-# @param {String} id
+# @param {Object} video
 # @param {Function} callback
 ###
-readVideoDetail = (id, callback) ->
-  console.log 'Read video detail: %s', id
-  api = 'http://www.imooc.com/course/ajaxmediainfo/?mode=flash&mid='
-  request.get api + id, (err, res) ->
+readVideoDetailAndDownload = (video, callback) ->
+  console.log 'Read video detail and download: %s', video.id
+  api = website + '/course/ajaxmediainfo/?mode=flash&mid='
+  url = api + video.id
+  request.get url, (err, res) ->
     if err
       return callback err
     if res and res.statusCode is 200
       body = JSON.parse(res.body)
       if body.result is 0
-        return callback null, body.data.result.mpath[0]
+        filename = video.name.replace(/([\\\/\:\*\?\"\<\>\|])/g,'_') + '.mp4'
+        request(body.data.result.mpath[0]).pipe(fs.createWriteStream(filename))
       else
         return callback body.msg
+    return
+  return
 
 ###
-# Save video
+# Read course list
 # @param {String} url
-# @param {String} filename
-####
-saveVideo = (url, filename) ->
-  console.log 'Download video %s url is %s', filename , url
-  request(url).pipe(
-    fs.createWriteStream filename
-  )
-
-
-if process.argv.length is 3 and process.argv[2]
-  argv = process.argv[2]
-  url = if isNaN argv then argv else 'http://www.imooc.com/learn/' + argv
-else
-  url = 'http://www.imooc.com/learn/514'
-
-readVideoList url, (err, video) ->
-  if err
-    throw err
-  readVideoDetail video.id, (err, videoUrl) ->
+# @param {Function} callback
+###
+readCourseList = (url, callback) ->
+  console.log(url)
+  request url, (err, res) ->
     if err
-      throw err
-    videoUrl and saveVideo videoUrl, video.name.replace(/([\\\/\:\*\?\"\<\>\|])/g,'_') + '.mp4'
+      return callback(err)
+    if res and res.statusCode is 200
+      $ = cheerio.load(res.body)
+      courses = []
+      courseItem = $('.course-item')
+      courseItem.each(() ->
+        $me = $(this)
+        item = {
+          title: $me.find('.title').text().trim()
+          description: $me.find('.description').text().trim()
+          url: website + $me.find('a').attr('href')
+        }
+        courses.push item
+      )
+      nextPage = $('.page').find('.active').next().attr('data-page')
+      if not nextPage
+        return callback(null, courses)
+      nextPageURL = url.replace(/(\d+$)/, nextPage)
+      readCourseList nextPageURL, (err, courses2) ->
+        if err
+          return callback(err)
+        return callback(null, courses.concat(courses2))
+    return
+  return
+
+###
+# Search course
+# @param {String} words
+# @param {Function} callback
+###
+searchCourse = (words, callback) ->
+  url = website + '/index/search?words=' + words + '&page=1'
+  request url, (err, res) ->
+    if err
+      return callback(err)
+    if res and res.statusCode is 200
+      $ = cheerio.load(res.body)
+      courseItem = $('.course-item')
+      if not courseItem.length
+        return callback("There is no result on \"#{words}\".")
+      readCourseList(url, callback)
+    return
+  return
+
+###
+# Do work
+# @param {String} action
+# @param {String} value
+# @param {Function} callback
+###
+doWork = (action, value, callback) ->
+  switch action
+    when '--search'
+      if not value
+        return callback 'Please input keywords.'
+      return searchCourse(value, callback)
+    when '--list'
+      if not value
+        return callback 'Please input course URL or ID'
+      url = if isNaN value then value else website + '/learn/' + value
+      return readVideoList(url, callback)
+    when '--download'
+      if not value
+        return callback 'Please input course URL or ID'
+      url = if isNaN value then value else website + '/learn/' + value
+      readVideoList url, (err, video) ->
+        if err
+          return callback err
+        return readVideoDetailAndDownload video, callback
+      return
+    else
+      return callback 'Unknown action.'
+
+argv = process.argv.slice(2)
+
+if not argv[0]
+  console.log "Usage: crawler.coffee [Options]"
+  console.log "  --search\t Search Search for the specified keywords"
+  console.log "  --list\t List the video list under the specified course ID or URL"
+  console.log "  --download\t Download the video list under the specified course ID or URL"
+  return
+
+for i of argv
+  if i % 2 isnt 0
+    continue
+  action = argv[i]
+  value = argv[Number(i) + 1]
+  doWork action, value, (err, res) ->
+    if err
+      return console.error err
+    console.log new Date(), res
+    return
