@@ -135,7 +135,7 @@ argv = process.argv.slice(2)
 
 if not argv[0]
   console.log "Usage: crawler.coffee [Options]"
-  console.log "  --search\t Search Search for the specified keywords"
+  console.log "  --search\t Search for the specified keywords"
   console.log "  --list\t List the video list under the specified course ID or URL"
   console.log "  --download\t Download the video list under the specified course ID or URL"
   return

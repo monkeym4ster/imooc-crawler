@@ -5,7 +5,7 @@ imooc website: http://www.imooc.com
 $ ./crawler.coffee
 
     Usage: crawler.coffee [Options]
-        --search  Search Search for the specified keywords
+        --search  Search for the specified keywords
         --list  List the video list under the specified course ID or URL
         --download  Download the video list under the specified course ID or URL
 
