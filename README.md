@@ -10,8 +10,11 @@ $ node crawler.js
         --download  Download the video list under the specified course ID or URL
 
 ## Screenshot
-![running.png](https://github.com/monkeym4ster/imooc_crawler/raw/master/screenshot/running.png)
-![results.png](https://github.com/monkeym4ster/imooc_crawler/raw/master/screenshot/results.png)
+![running](https://github.com/monkeym4ster/imooc_crawler/raw/master/screenshot/running.png)
+![search](https://github.com/monkeym4ster/imooc_crawler/raw/master/screenshot/search.png)
+![download](https://github.com/monkeym4ster/imooc_crawler/raw/master/screenshot/download.png)
+![videolist](https://github.com/monkeym4ster/imooc_crawler/raw/master/screenshot/video_list.png)
+![results](https://github.com/monkeym4ster/imooc_crawler/raw/master/screenshot/results.png)
 
 ## Installation
 
