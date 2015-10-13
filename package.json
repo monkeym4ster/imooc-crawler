@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "cheerio": "^0.19.0",
+    "colors": "^1.1.2",
     "request": "^2.64.0"
   }
 }

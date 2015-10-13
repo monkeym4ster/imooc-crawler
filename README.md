@@ -2,9 +2,9 @@
 imooc website: http://www.imooc.com
 
 ## Usage
-$ ./crawler.coffee
+$ node crawler.js
 
-    Usage: crawler.coffee [Options]
+    Usage: crawler.js [Options]
         --search  Search for the specified keywords
         --list  List the video list under the specified course ID or URL
         --download  Download the video list under the specified course ID or URL
@@ -25,5 +25,4 @@ You can download the zip or clone the git repository :
 
 ### Install package
 	npm install
-
 

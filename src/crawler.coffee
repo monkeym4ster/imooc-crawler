@@ -1,4 +1,3 @@
-#!/usr/bin/env coffee
 request = require('request')
 cheerio = require('cheerio')
 fs = require('fs')
@@ -137,7 +136,7 @@ doWork = (action, value, callback) ->
 argv = process.argv.slice(2)
 
 if not argv[0]
-  console.log "Usage: crawler.coffee [Options]"
+  console.log "Usage: crawler.js [Options]"
   console.log "  --search\t Search for the specified keywords"
   console.log "  --list\t List the video list under the specified course ID or URL"
   console.log "  --download\t Download the video list under the specified course ID or URL"
