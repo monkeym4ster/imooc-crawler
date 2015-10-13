@@ -55,7 +55,7 @@
     var api, url;
     api = website + '/course/ajaxmediainfo/?mode=flash&mid=';
     url = api + video.id;
-    console.log(colors.gray("Read video detail and download: " + video.name + ".mp4 , url: " + url));
+    console.log(colors.gray("Download course: " + video.name + ".mp4 , url: " + url));
     request.get(url, function(err, res) {
       var body, filename;
       if (err) {
@@ -169,11 +169,15 @@
           return callback('Please input course URL or ID');
         }
         url = isNaN(value) ? value : website + '/learn/' + value;
-        readVideoList(url, function(err, video) {
+        readVideoList(url, function(err, videos) {
+          var i, len, video;
           if (err) {
             return callback(err);
           }
-          return readVideoDetailAndDownload(video, callback);
+          for (i = 0, len = videos.length; i < len; i++) {
+            video = videos[i];
+            readVideoDetailAndDownload(video, callback);
+          }
         });
         break;
       default:
@@ -184,7 +188,7 @@
   argv = process.argv.slice(2);
 
   if (!argv[0]) {
-    console.log("Usage: crawler.coffee [Options]");
+    console.log("Usage: crawler.js [Options]");
     console.log("  --search\t Search for the specified keywords");
     console.log("  --list\t List the video list under the specified course ID or URL");
     console.log("  --download\t Download the video list under the specified course ID or URL");

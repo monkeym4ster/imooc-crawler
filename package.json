@@ -5,9 +5,13 @@
     "coffee-script": "^1.10.0"
   },
   "description": "imooc web crawler",
-  "main": "crawler.coffee",
+  "main": "crawler.js",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/monkeym4ster/imooc_crawler.git"
+  },
   "scripts": {
-    "start": "coffee crawler.coffee"
+    "start": "node crawler.js"
   },
   "keywords": [
     "crawler"

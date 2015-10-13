@@ -37,7 +37,7 @@ readVideoList = (url, callback) ->
 readVideoDetailAndDownload = (video, callback) ->
   api = website + '/course/ajaxmediainfo/?mode=flash&mid='
   url = api + video.id
-  console.log colors.gray "Read video detail and download: #{video.name}.mp4 , url: #{url}"
+  console.log colors.gray "Download course: #{video.name}.mp4 , url: #{url}"
   request.get url, (err, res) ->
     if err
       return callback err
@@ -125,10 +125,12 @@ doWork = (action, value, callback) ->
       if not value
         return callback 'Please input course URL or ID'
       url = if isNaN value then value else website + '/learn/' + value
-      readVideoList url, (err, video) ->
+      readVideoList url, (err, videos) ->
         if err
           return callback err
-        return readVideoDetailAndDownload video, callback
+        for video in videos
+          readVideoDetailAndDownload video, callback
+        return
       return
     else
       return callback 'Unknown action.'
