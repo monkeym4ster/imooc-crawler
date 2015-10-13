@@ -17,14 +17,16 @@ readVideoList = (url, callback) ->
       return callback err
     if res and res.statusCode is 200
       $ = cheerio.load(res.body)
+      videos = []
       $('.J-media-item').each () ->
         $me = $(this)
         item = {
           id: $me.attr('href').match(/\d+/)[0]
           name: $me.text().trim()
         }
-        return callback null, item
-      return
+        videos.push item
+      return callback null, videos
+    return
   return
 
 ###
@@ -33,9 +35,9 @@ readVideoList = (url, callback) ->
 # @param {Function} callback
 ###
 readVideoDetailAndDownload = (video, callback) ->
-  console.log 'Read video detail and download: %s', video.id
   api = website + '/course/ajaxmediainfo/?mode=flash&mid='
   url = api + video.id
+  console.log 'Read video detail and download: %s.mp4 , url: %s', video.name, url
   request.get url, (err, res) ->
     if err
       return callback err
@@ -140,13 +142,17 @@ if not argv[0]
   console.log "  --download\t Download the video list under the specified course ID or URL"
   return
 
-for i of argv
-  if i % 2 isnt 0
+for arg of argv
+  if arg % 2 isnt 0
     continue
-  action = argv[i]
-  value = argv[Number(i) + 1]
+  action = argv[arg]
+  value = argv[Number(arg) + 1]
   doWork action, value, (err, res) ->
     if err
       return console.error err
-    console.log new Date(), res
+    for arr in res
+      console.log '-'.repeat(50)
+      for key of arr
+        val = arr[key]
+        console.log "#{key}: #{val}"
     return
