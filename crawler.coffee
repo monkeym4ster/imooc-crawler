@@ -2,6 +2,7 @@
 request = require('request')
 cheerio = require('cheerio')
 fs = require('fs')
+colors = require('colors')
 
 website = 'http://www.imooc.com'
 
@@ -11,7 +12,7 @@ website = 'http://www.imooc.com'
 # @param {Function} callback
 ###
 readVideoList = (url, callback) ->
-  console.log 'Read video list: %s', url
+  console.log colors.gray "Read video list: #{url}"
   request.get url, (err, res) ->
     if err
       return callback err
@@ -37,7 +38,7 @@ readVideoList = (url, callback) ->
 readVideoDetailAndDownload = (video, callback) ->
   api = website + '/course/ajaxmediainfo/?mode=flash&mid='
   url = api + video.id
-  console.log 'Read video detail and download: %s.mp4 , url: %s', video.name, url
+  console.log colors.gray "Read video detail and download: #{video.name}.mp4 , url: #{url}"
   request.get url, (err, res) ->
     if err
       return callback err
@@ -57,7 +58,7 @@ readVideoDetailAndDownload = (video, callback) ->
 # @param {Function} callback
 ###
 readCourseList = (url, callback) ->
-  console.log(url)
+  console.log colors.gray "Read course list: #{url}"
   request url, (err, res) ->
     if err
       return callback(err)
@@ -149,10 +150,10 @@ for arg of argv
   value = argv[Number(arg) + 1]
   doWork action, value, (err, res) ->
     if err
-      return console.error err
+      return console.error colors.red(err)
     for arr in res
-      console.log '-'.repeat(50)
+      console.log '-'.repeat(30)
       for key of arr
         val = arr[key]
-        console.log "#{key}: #{val}"
+        console.log "#{colors.green(key)}: #{val}"
     return
