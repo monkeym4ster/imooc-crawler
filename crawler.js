@@ -170,12 +170,12 @@
         }
         url = isNaN(value) ? value : website + '/learn/' + value;
         readVideoList(url, function(err, videos) {
-          var i, len, video;
+          var j, len, video;
           if (err) {
             return callback(err);
           }
-          for (i = 0, len = videos.length; i < len; i++) {
-            video = videos[i];
+          for (j = 0, len = videos.length; j < len; j++) {
+            video = videos[j];
             readVideoDetailAndDownload(video, callback);
           }
         });
@@ -202,13 +202,18 @@
     action = argv[arg];
     value = argv[Number(arg) + 1];
     doWork(action, value, function(err, res) {
-      var arr, i, key, len, val;
+      var arr, i, j, key, len, line, val;
       if (err) {
         return console.error(colors.red(err));
       }
-      for (i = 0, len = res.length; i < len; i++) {
-        arr = res[i];
-        console.log('-'.repeat(30));
+      line = '';
+      i = 0;
+      while (i++ < 30) {
+        line += '-';
+      }
+      for (j = 0, len = res.length; j < len; j++) {
+        arr = res[j];
+        console.log(line);
         for (key in arr) {
           val = arr[key];
           console.log((colors.green(key)) + ": " + val);

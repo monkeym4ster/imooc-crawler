@@ -152,8 +152,12 @@ for arg of argv
   doWork action, value, (err, res) ->
     if err
       return console.error colors.red(err)
+    line = ''
+    i = 0
+    while i++ < 30
+      line += '-'
     for arr in res
-      console.log '-'.repeat(30)
+      console.log line
       for key of arr
         val = arr[key]
         console.log "#{colors.green(key)}: #{val}"
