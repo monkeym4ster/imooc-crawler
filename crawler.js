@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 (function() {
-  var action, arg, argv, cheerio, colors, doWork, fs, readCourseList, readVideoDetailAndDownload, readVideoList, request, searchCourse, value, website;
+  var Multiprogress, action, arg, argv, cheerio, colors, doWork, fs, multi, readCourseList, readVideoDetailAndDownload, readVideoList, request, searchCourse, value, website;
 
   request = require('request');
 
@@ -10,6 +10,10 @@
   fs = require('fs');
 
   colors = require('colors');
+
+  Multiprogress = require('multi-progress');
+
+  multi = new Multiprogress(process.stderr);
 
   website = 'http://www.imooc.com';
 
@@ -40,6 +44,8 @@
           return videos.push(item);
         });
         return callback(null, videos);
+      } else {
+        return calback(res.statusCode);
       }
     });
   };
@@ -52,20 +58,31 @@
    */
 
   readVideoDetailAndDownload = function(video, callback) {
-    var api, url;
+    var api, filename, url;
     api = website + '/course/ajaxmediainfo/?mode=flash&mid=';
     url = api + video.id;
-    console.log(colors.gray("Download course: " + video.name + ".mp4 , url: " + url));
+    filename = video.name.match(/(.*)\s\(/)[1] + '.mp4';
+    console.log(colors.gray("Download course: " + filename + ", url: " + url));
     request.get(url, function(err, res) {
-      var body, filename;
+      var body;
       if (err) {
         return callback(err);
       }
       if (res && res.statusCode === 200) {
         body = JSON.parse(res.body);
         if (body.result === 0) {
-          filename = video.name.replace(/([\\\/\:\*\?\"\<\>\|])/g, '_') + '.mp4';
-          request(body.data.result.mpath[0]).pipe(fs.createWriteStream(filename));
+          filename = filename.replace(/([\\\/\*\:\?\"\<\>\|])/g, '_');
+          request.get(body.data.result.mpath[0]).on('response', function(res) {
+            var len, progressBar;
+            len = parseInt(res.headers['content-length'], 10);
+            progressBar = multi.newBar("Downloading " + filename + " [:bar] :percent :etas", {
+              width: 50,
+              total: len
+            });
+            return res.on('data', function(chunk) {
+              return progressBar.tick(chunk.length);
+            });
+          }).pipe(fs.createWriteStream(filename));
         } else {
           return callback(body.msg);
         }
@@ -170,11 +187,11 @@
         }
         url = isNaN(value) ? value : website + '/learn/' + value;
         readVideoList(url, function(err, videos) {
-          var j, len, video;
+          var j, len1, video;
           if (err) {
             return callback(err);
           }
-          for (j = 0, len = videos.length; j < len; j++) {
+          for (j = 0, len1 = videos.length; j < len1; j++) {
             video = videos[j];
             readVideoDetailAndDownload(video, callback);
           }
@@ -202,7 +219,7 @@
     action = argv[arg];
     value = argv[Number(arg) + 1];
     doWork(action, value, function(err, res) {
-      var arr, i, j, key, len, line, val;
+      var arr, i, j, key, len1, line, val;
       if (err) {
         return console.error(colors.red(err));
       }
@@ -211,7 +228,7 @@
       while (i++ < 30) {
         line += '-';
       }
-      for (j = 0, len = res.length; j < len; j++) {
+      for (j = 0, len1 = res.length; j < len1; j++) {
         arr = res[j];
         console.log(line);
         for (key in arr) {

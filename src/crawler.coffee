@@ -2,6 +2,8 @@ request = require('request')
 cheerio = require('cheerio')
 fs = require('fs')
 colors = require('colors')
+Multiprogress = require('multi-progress')
+multi = new Multiprogress(process.stderr)
 
 website = 'http://www.imooc.com'
 
@@ -11,7 +13,7 @@ website = 'http://www.imooc.com'
 # @param {Function} callback
 ###
 readVideoList = (url, callback) ->
-  console.log colors.gray "Read video list: #{url}"
+  console.log colors.gray("Read video list: #{url}")
   request.get url, (err, res) ->
     if err
       return callback err
@@ -26,6 +28,8 @@ readVideoList = (url, callback) ->
         }
         videos.push item
       return callback null, videos
+    else
+      return calback res.statusCode
     return
   return
 
@@ -37,15 +41,26 @@ readVideoList = (url, callback) ->
 readVideoDetailAndDownload = (video, callback) ->
   api = website + '/course/ajaxmediainfo/?mode=flash&mid='
   url = api + video.id
-  console.log colors.gray "Download course: #{video.name}.mp4 , url: #{url}"
+  filename = video.name.match(/(.*)\s\(/)[1] + '.mp4'
+  console.log colors.gray "Download course: #{filename}, url: #{url}"
   request.get url, (err, res) ->
     if err
       return callback err
     if res and res.statusCode is 200
       body = JSON.parse(res.body)
       if body.result is 0
-        filename = video.name.replace(/([\\\/\:\*\?\"\<\>\|])/g,'_') + '.mp4'
-        request(body.data.result.mpath[0]).pipe(fs.createWriteStream(filename))
+        filename = filename.replace(/([\\\/\*\:\?\"\<\>\|])/g, '_')
+        request.get body.data.result.mpath[0]
+          .on('response', (res) ->
+            len = parseInt(res.headers['content-length'], 10)
+            progressBar = multi.newBar("Downloading #{filename} [:bar] :percent :etas", {
+              width: 50
+              total: len
+            })
+            res.on 'data', (chunk) ->
+              progressBar.tick(chunk.length)
+          )
+          .pipe(fs.createWriteStream(filename))
       else
         return callback body.msg
     return
@@ -76,12 +91,12 @@ readCourseList = (url, callback) ->
       )
       nextPage = $('.page').find('.active').next().attr('data-page')
       if not nextPage
-        return callback(null, courses)
+        return callback null, courses
       nextPageURL = url.replace(/(\d+$)/, nextPage)
       readCourseList nextPageURL, (err, courses2) ->
         if err
-          return callback(err)
-        return callback(null, courses.concat(courses2))
+          return callback err
+        return callback null, courses.concat(courses2)
     return
   return
 
@@ -100,7 +115,7 @@ searchCourse = (words, callback) ->
       courseItem = $('.course-item')
       if not courseItem.length
         return callback("There is no result on \"#{words}\".")
-      readCourseList(url, callback)
+      readCourseList url, callback
     return
   return
 
@@ -120,7 +135,7 @@ doWork = (action, value, callback) ->
       if not value
         return callback 'Please input course URL or ID'
       url = if isNaN value then value else website + '/learn/' + value
-      return readVideoList(url, callback)
+      return readVideoList url, callback
     when '--download'
       if not value
         return callback 'Please input course URL or ID'

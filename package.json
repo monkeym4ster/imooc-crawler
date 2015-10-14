@@ -21,6 +21,7 @@
   "dependencies": {
     "cheerio": "^0.19.0",
     "colors": "^1.1.2",
+    "multi-progress": "^1.0.0",
     "request": "^2.64.0"
   }
 }
