@@ -61,7 +61,7 @@
     var api, filename, url;
     api = website + '/course/ajaxmediainfo/?mode=flash&mid=';
     url = api + video.id;
-    filename = video.name.match(/(.*)\s\(/)[1] + '.mp4';
+    filename = video.name.replace(/\(\d.+$/, '').trim() + '.mp4';
     console.log(colors.gray("Download course: " + filename + ", url: " + url));
     request.get(url, function(err, res) {
       var body;
